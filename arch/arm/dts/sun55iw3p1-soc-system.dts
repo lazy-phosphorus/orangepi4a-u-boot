@@ -1236,4 +1236,4 @@ pwm: pwm@2000c00 {
 };
 
 #include "sun55iw3p1-clk.dtsi"
-#include ".board-uboot.dts"
+#include "board-uboot.dts"
