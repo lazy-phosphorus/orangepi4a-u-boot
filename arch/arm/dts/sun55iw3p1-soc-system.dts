@@ -1187,13 +1187,14 @@ pwm: pwm@2000c00 {
 				<&clk_sdmmc2_bus>;
 			status = "okay";
 		};
+
 		combophy: phy@4f00000 {
 			compatible = "allwinner,inno-combphy";
 			reg = <0x0 0x04f00000 0x0 0x80000>, /* Sub-System Application Registers */
 			      <0x0 0x04f80000 0x0 0x80000>; /* Combo INNO PHY Registers */
 			reg-names = "phy-ctl", "phy-clk";
 			#phy-cells = <1>;
-			status = "disabled";
+			status = "okay";
 		};
 
 		pcie: pcie@4800000 {
@@ -1216,7 +1217,7 @@ pwm: pwm@2000c00 {
 			num-ib-windows = <8>;
 			num-ob-windows = <8>;
 			linux,pci-domain = <0>;
-			status = "disabled";
+			status = "okay";
 		};
 	};
 
