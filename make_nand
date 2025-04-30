@@ -22,11 +22,11 @@ export platform
 SRCTREE		:= $(CURDIR)
 TOPDIR		:= $(SRCTREE)
 
-ifeq ("$(platform)", "CONFIG_MACH_SUN20IW1")
-CROSS_COMPILE := $(TOPDIR)/../tools/toolchain/riscv64-linux-x86_64-20200528/bin/riscv64-unknown-linux-gnu-
-else
-CROSS_COMPILE := $(TOPDIR)/../tools/toolchain/gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-
-endif
+# ifeq ("$(platform)", "CONFIG_MACH_SUN20IW1")
+# CROSS_COMPILE := $(TOPDIR)/../tools/toolchain/riscv64-linux-x86_64-20200528/bin/riscv64-unknown-linux-gnu-
+# else
+# CROSS_COMPILE := $(TOPDIR)/../tools/toolchain/gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-
+# endif
 
 DRIVER_DIR	:= $(TOPDIR)/drivers/sunxi_flash/nand
 export TOPDIR
@@ -50,7 +50,7 @@ CFLGAS = -nostdinc -isystem -D__KERNEL__ -D__UBOOT__ -Wall -Wstrict-prototypes -
 INCLUDE = -I$(shell dirname `$(CC)  -print-libgcc-file-name`)/include \
 		  -I$(SRCTREE)/include \
 		  -I$(SRCTREE)/arch/riscv/include \
-		  -I$(TOPDIR)/../tools/toolchain/riscv64-linux-x86_64-20200528/lib/gcc/riscv64-unknown-linux-gnu/8.1.0/include
+		#   -I$(TOPDIR)/../tools/toolchain/riscv64-linux-x86_64-20200528/lib/gcc/riscv64-unknown-linux-gnu/8.1.0/include
 
 else
 
