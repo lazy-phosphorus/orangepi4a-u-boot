@@ -548,7 +548,7 @@ static int make_ftrace(void)
 			{ 10, "notice" },
 			{ 50, "warning" },
 			{ 100, "error" } };
-	const char *prompt;
+	const char *prompt = NULL;
 	for (i = 0; i < 64; i++) {
 		entry_time[i] = UINT64_MAX;
 	}

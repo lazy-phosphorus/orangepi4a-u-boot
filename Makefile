@@ -83,18 +83,18 @@ else
   Q = @
 endif
 
-buildconfig = ../../../.buildconfig
-ifeq ($(buildconfig), $(wildcard $(buildconfig)))
-	LICHEE_BUSSINESS=$(shell cat $(buildconfig) | grep -w "LICHEE_BUSSINESS" | awk -F= '{printf $$2}')
-	LICHEE_CHIP_CONFIG_DIR=$(shell cat $(buildconfig) | grep -w "LICHEE_CHIP_CONFIG_DIR" | awk -F= '{printf $$2}')
-	LICHEE_ARCH=$(shell cat $(buildconfig) | grep -w "LICHEE_ARCH" | awk -F= '{printf $$2}')
-	LICHEE_IC=$(shell cat $(buildconfig) | grep -w "LICHEE_IC" | awk -F= '{printf $$2}')
-	LICHEE_CHIP=$(shell cat $(buildconfig) | grep -w "LICHEE_CHIP" | awk -F= '{printf $$2}')
-	LICHEE_BOARD=$(shell cat $(buildconfig) | grep -w "LICHEE_BOARD" | awk -F= '{printf $$2}')
-	LICHEE_PLAT_OUT=$(shell cat $(buildconfig) | grep -w "LICHEE_PLAT_OUT" | awk -F= '{printf $$2}')
-	LICHEE_BOARD_CONFIG_DIR=$(shell cat $(buildconfig) | grep -w "LICHEE_BOARD_CONFIG_DIR" | awk -F= '{printf $$2}')
-	export LICHEE_BUSSINESS LICHEE_CHIP_CONFIG_DIR LICHEE_IC LICHEE_ARCH LICHEE_CHIP LICHEE_BOARD LICHEE_PLAT_OUT LICHEE_BOARD_CONFIG_DIR
-endif
+# buildconfig = ../../../.buildconfig
+# ifeq ($(buildconfig), $(wildcard $(buildconfig)))
+# 	LICHEE_BUSSINESS=$(shell cat $(buildconfig) | grep -w "LICHEE_BUSSINESS" | awk -F= '{printf $$2}')
+# 	LICHEE_CHIP_CONFIG_DIR=$(shell cat $(buildconfig) | grep -w "LICHEE_CHIP_CONFIG_DIR" | awk -F= '{printf $$2}')
+# 	LICHEE_ARCH=$(shell cat $(buildconfig) | grep -w "LICHEE_ARCH" | awk -F= '{printf $$2}')
+# 	LICHEE_IC=$(shell cat $(buildconfig) | grep -w "LICHEE_IC" | awk -F= '{printf $$2}')
+# 	LICHEE_CHIP=$(shell cat $(buildconfig) | grep -w "LICHEE_CHIP" | awk -F= '{printf $$2}')
+# 	LICHEE_BOARD=$(shell cat $(buildconfig) | grep -w "LICHEE_BOARD" | awk -F= '{printf $$2}')
+# 	LICHEE_PLAT_OUT=$(shell cat $(buildconfig) | grep -w "LICHEE_PLAT_OUT" | awk -F= '{printf $$2}')
+# 	LICHEE_BOARD_CONFIG_DIR=$(shell cat $(buildconfig) | grep -w "LICHEE_BOARD_CONFIG_DIR" | awk -F= '{printf $$2}')
+# 	export LICHEE_BUSSINESS LICHEE_CHIP_CONFIG_DIR LICHEE_IC LICHEE_ARCH LICHEE_CHIP LICHEE_BOARD LICHEE_PLAT_OUT LICHEE_BOARD_CONFIG_DIR
+# endif
 
 # If the user is running make -s (silent mode), suppress echoing of
 # commands
@@ -410,7 +410,7 @@ include scripts/Kbuild.include
 AS		= $(CROSS_COMPILE)as
 # Always use GNU ld
 ifneq ($(shell $(CROSS_COMPILE)ld.bfd -v 2> /dev/null),)
-LD		= $(CROSS_COMPILE)ld.bfd
+LD		= $(CROSS_COMPILE)ld.bfd --no-warn-rwx-segments --no-warn-execstack
 else
 LD		= $(CROSS_COMPILE)ld
 endif
@@ -435,16 +435,26 @@ CHECK		= sparse
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void -D__CHECK_ENDIAN__ $(CF)
 
+DTC_FLAGS += -Wno-unit_address_vs_reg \
+		-Wno-unit_address_format \
+		-Wno-simple_bus_reg \
+		-Wno-pwms_property \
+		-Wno-avoid_default_addr_size \
+		-Wno-pci_device_bus_num \
+		-Wno-pci_device_reg \
+		-Wno-reg_format
+
 KBUILD_CPPFLAGS := -D__KERNEL__ -D__UBOOT__
 
 KBUILD_CFLAGS   := -Wall -Wstrict-prototypes \
 		   -Wno-format-security \
+		   -Wno-array-bounds \
+		   -Wno-address-of-packed-member \
+		   -Wno-sizeof-pointer-div \
+		   -fno-stack-protector \
 		   -fno-builtin -ffreestanding $(CSTD_FLAG) \
 		   -Werror
-ifeq (x$(CONFIG_ARCH_RV32I), xy)
-KBUILD_CFLAGS	+= -Wno-error=address-of-packed-member
-KBUILD_CFLAGS	+= -Wno-address-of-packed-member
-endif
+
 KBUILD_CFLAGS	+= -fshort-wchar
 KBUILD_AFLAGS   := -D__ASSEMBLY__
 
@@ -573,7 +583,7 @@ else
 # Build targets only - this includes vmlinux, arch specific targets, clean
 # targets and others. In general all targets except *config targets.
 
-# Additional helpers built in scripts/
+# Additional helpers built in scripts
 # Carefully list dependencies so we do not try to build scripts twice
 # in parallel
 PHONY += scripts
@@ -1021,10 +1031,6 @@ BOARD_DTS_EXIST = $(shell if [ -f $(DTS_PATH)/$(BOARD_DTS_NAME).dts ]; then echo
 
 DEVICE_BOARD_DTS_EXIST = $(shell if [ -f $(LICHEE_BOARD_CONFIG_DIR)/uboot-board.dts ]; then echo yes; else echo no; fi;)
 
-DTS_WARNNING_SKIP :=	-W no-unit_address_vs_reg \
-			-W no-unit_address_format \
-			-W no-simple_bus_reg \
-			-W no-pwms_property
 ifeq (x$(DEVICE_BOARD_DTS_EXIST), xyes)
 # add depend on external dts, make sure dts in uboot up to date
 dts/dt.dtb: $(LICHEE_BOARD_CONFIG_DIR)/uboot-board.dts
@@ -1048,17 +1054,17 @@ dtbs: dts/dt.dtb
 	@:
 dts/dt.dtb: u-boot
 
-ifeq (x$(DEVICE_BOARD_DTS_EXIST), xyes)
-	@-cp -v $(LICHEE_BOARD_CONFIG_DIR)/uboot-board.dts $(DTS_PATH)/.board-uboot.dts
-else
-ifeq (x$(BOARD_DTS_EXIST),xyes)
-	@-cp -v $(DTS_PATH)/$(BOARD_DTS_NAME).dts $(DTS_PATH)/.board-uboot.dts
-else
-	@-cp -v $(DTS_PATH)/$(CONFIG_SYS_CONFIG_NAME)-common-board.dts $(DTS_PATH)/.board-uboot.dts
-endif
-endif
+# ifeq (x$(DEVICE_BOARD_DTS_EXIST), xyes)
+# 	@-cp -v $(LICHEE_BOARD_CONFIG_DIR)/uboot-board.dts $(DTS_PATH)/.board-uboot.dts
+# else
+# ifeq (x$(BOARD_DTS_EXIST),xyes)
+# 	@-cp -v $(DTS_PATH)/$(BOARD_DTS_NAME).dts $(DTS_PATH)/.board-uboot.dts
+# else
+# 	@-cp -v $(DTS_PATH)/$(CONFIG_SYS_CONFIG_NAME)-common-board.dts $(DTS_PATH)/.board-uboot.dts
+# endif
+# endif
 	$(Q)$(MAKE) $(build)=dts dtbs
-	$(DTC) $(DTS_WARNNING_SKIP) -I dtb -O dts  $(DTS_PATH)/$(CONFIG_DEFAULT_DEVICE_TREE).dtb > u-boot-dtb.dts
+	$(Q)$(DTC) $(DTC_FLAGS) -I dtb -O dts  $(DTS_PATH)/$(CONFIG_DEFAULT_DEVICE_TREE).dtb > u-boot-dtb.dts
 
 
 quiet_cmd_copy = COPY    $@
@@ -1104,13 +1110,13 @@ TARGET_BIN_NAME := u-boot$(TARGET_BIN_DECORATOR)-$(CONFIG_SYS_CONFIG_NAME).bin
 
 u-boot-$(CONFIG_SYS_CONFIG_NAME).bin:   u-boot.bin
 	@cp -v $<    $@
-ifeq ($(TARGET_BUILD_VARIANT),tina)
-	@cp -v $@ $(objtree)/../../../$(TARGET_BIN_DIR)/$(TARGET_BIN_NAME)
-else
-#LICHEE_BUSSINESS could be empty and result in "//", bui it will be treated as "/", it's fine
-	@-cp -v $@ $(LICHEE_CHIP_CONFIG_DIR)/$(LICHEE_BUSSINESS)/bin/$(TARGET_BIN_NAME)
-	@-cp -v $@ $(LICHEE_PLAT_OUT)/$(TARGET_BIN_NAME)
-endif
+# ifeq ($(TARGET_BUILD_VARIANT),tina)
+# 	@cp -v $@ $(objtree)/../../../$(TARGET_BIN_DIR)/$(TARGET_BIN_NAME)
+# else
+# #LICHEE_BUSSINESS could be empty and result in "//", bui it will be treated as "/", it's fine
+# 	@-cp -v $@ $(LICHEE_CHIP_CONFIG_DIR)/$(LICHEE_BUSSINESS)/bin/$(TARGET_BIN_NAME)
+# 	@-cp -v $@ $(LICHEE_PLAT_OUT)/$(TARGET_BIN_NAME)
+# endif
 
 %.imx: %.bin
 	$(Q)$(MAKE) $(build)=arch/arm/mach-imx $@
@@ -1619,16 +1625,16 @@ define filechk_version.h
 	echo \#define LD_VERSION_STRING \"$$(LC_ALL=C $(LD) --version | head -n 1)\"; )
 endef
 
-DIRTY:=$(shell echo `git describe --dirty|grep -o dirty$$`)
-DEF_DOT_CONFIG_HASH=$(shell echo `cat .tmp_config_from_defconfig.o.md5sum`)
-CUR_DOT_CONFIG_HASH=$(shell echo `md5sum .config| awk '{printf $$1}'`)
-CONFIG_DIRTY:=$(shell if [ $(DEF_DOT_CONFIG_HASH) = $(CUR_DOT_CONFIG_HASH) ]; \
-	then echo ""; \
-	else echo "-config-dirty"; \
-	fi)
-ifeq ($(DIRTY)$(CONFIG_DIRTY),)
-	export SOURCE_DATE_EPOCH=$(shell echo `git log -1 --pretty=%ct`)
-endif
+# DIRTY:=$(shell echo `git describe --dirty|grep -o dirty$$`)
+# DEF_DOT_CONFIG_HASH=$(shell echo `cat .tmp_config_from_defconfig.o.md5sum`)
+# CUR_DOT_CONFIG_HASH=$(shell echo `md5sum .config| awk '{printf $$1}'`)
+# CONFIG_DIRTY:=$(shell if [ $(DEF_DOT_CONFIG_HASH) = $(CUR_DOT_CONFIG_HASH) ]; \
+# 	then echo ""; \
+# 	else echo "-config-dirty"; \
+# 	fi)
+# ifeq ($(DIRTY)$(CONFIG_DIRTY),)
+# 	export SOURCE_DATE_EPOCH=$(shell echo `git log -1 --pretty=%ct`)
+# endif
 
 
 # The SOURCE_DATE_EPOCH mechanism requires a date that behaves like GNU date.

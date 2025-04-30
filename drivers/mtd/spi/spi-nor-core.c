@@ -1751,7 +1751,7 @@ static int sunxi_check_lock_status_sr_cr(struct spi_nor *nor, loff_t ofs,
 		u64 len, u8 sr, u8 cr, bool locked)
 {
 	loff_t lock_offs;
-	uint64_t lock_len;
+	uint64_t lock_len = 0;
 
 	if (!len)
 		return 1;

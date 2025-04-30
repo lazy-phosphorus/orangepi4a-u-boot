@@ -571,6 +571,7 @@ pwm: pwm@2000c00 {
 			clocks = <&clk_de0>;
 			clock-names = "clk_de";
 			status = "okay";
+			interrupt-parent = <&gic>;
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -648,6 +649,7 @@ pwm: pwm@2000c00 {
 			clock-names = "clk_tcon";
 			top = <&vo0>;
 			status = "disabled";
+			interrupt-parent = <&gic>;
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -697,6 +699,7 @@ pwm: pwm@2000c00 {
 			top = <&vo0>;
 			status = "disabled";
 			// TODO find panel used of_graph?
+			interrupt-parent = <&gic>;
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -733,6 +736,7 @@ pwm: pwm@2000c00 {
 			clock-names = "clk_tcon";
 			top = <&vo1>;
 			status = "disabled";
+			interrupt-parent = <&gic>;
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -872,6 +876,7 @@ pwm: pwm@2000c00 {
 			phys = <&dsi0combophy>;
 			phy-names = "combophy";
 			status = "disabled";
+			interrupt-parent = <&gic>;
 
 			ports {
 				#address-cells = <1>;
@@ -908,6 +913,7 @@ pwm: pwm@2000c00 {
 			phys = <&dsi1combophy>;
 			phy-names = "combophy";
 			status = "disabled";
+			interrupt-parent = <&gic>;
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -936,6 +942,7 @@ pwm: pwm@2000c00 {
 
 			top = <&vo0>;
 			status = "disabled";
+			interrupt-parent = <&gic>;
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -972,6 +979,7 @@ pwm: pwm@2000c00 {
 			clock-names = "clk_tcon";
 			top = <&vo0>;
 			status = "disabled";
+			interrupt-parent = <&gic>;
 
 			ports {
 				#address-cells = <1>;
@@ -1009,6 +1017,7 @@ pwm: pwm@2000c00 {
 			clock-names = "clk_edp", "clk_24m_edp";
 			//FIXME
 			status = "disabled";
+			interrupt-parent = <&gic>;
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -1065,7 +1074,7 @@ pwm: pwm@2000c00 {
 				 <&clk_mipi_dsi1>,
 				 <&clk_mipi_dsi_combphy0>,
 				 <&clk_mipi_dsi_combphy1>;
-		//	interrupt-parent = <&gic>;
+			interrupt-parent = <&gic>;
 			boot_disp = <0>;
 			boot_disp1 = <0>;
 			boot_disp2 = <0>;
@@ -1126,6 +1135,7 @@ pwm: pwm@2000c00 {
 			clocks = <&clk_edp>, <&clk_edp_24m>;
 			reset-names = "rst_bus_edp";
 			status = "okay";
+			interrupt-parent = <&gic>;
 		};
 
 		lcd0: lcd0@1c0c000 {
