@@ -6,7 +6,7 @@
  */
 
 #ifndef _SUNXI_PMIC_BUS_H
-#define _SUNXI_PMIS_BUS_H
+#define _SUNXI_PMIC_BUS_H
 
 int pmic_bus_init(u16 device_addr, u16 runtime_addr);
 int pmic_bus_exit(void);
